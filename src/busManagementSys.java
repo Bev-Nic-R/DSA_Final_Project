@@ -23,9 +23,6 @@ public class busManagementSys {
 
     public static final int ONE_HUNDRED = 100;
     public static EdgeWeightedDigraph digraph;
-    public int indexOfMap = 0;
-
-
 
 
     public static void main(String[] args){
@@ -36,6 +33,18 @@ public class busManagementSys {
 
         String test = "FLAGSTOP NB MILLER RD AT DEEP BAY";
         System.out.println(reformatStreetName(test));
+        searchBusStop("Has");
+    }
+
+    public static void searchBusStop(String prefix){
+        int counter = 0;
+        for (String s : TST.keysWithPrefix(prefix.toUpperCase())) {
+            counter++; // count used to check if bus stops with this name were found
+            System.out.println(s); // print out each bus stop name with inputted prefix
+        }
+        if (counter == 0) {
+            System.out.println("There are no existing stops with this prefix.");
+        }
     }
 
     public static void findShortestPath(int sourceVertex, int destinationVertex){
@@ -71,9 +80,23 @@ public class busManagementSys {
             Scanner myReader = new Scanner(myObj);
             myReader.nextLine(); // skip the first line
             stops = new ArrayList<>();
+            TST = new TST<>();
+            String stop_id;
+            String stop_code;
+            String reformattedStop;
+            String reformattedLine;
+            int index = 0;
             while (myReader.hasNextLine()) {
                 String[] line = myReader.nextLine().split(","); // split line at comma
                 stops.add(parseInt(line[0])); // add each bus stop ID to the bus stops arraylist
+                reformattedStop = reformatStreetName(line[2]);
+                stop_id = line[0];
+                stop_code = line[1];
+                line[0] = "";
+                line[1] = "";
+                reformattedLine = reformattedStop + ", " + line[3] + ", " + line[4] + ", " + line[5] + ", " +  line[6] + ", " +  line[7] + ", " +  line[8] + ", " +  stop_id + ", " +  stop_code;
+                TST.put(reformattedLine, Integer.toString(index));
+                index++;
             }
             Collections.sort(stops); // sort Bus Stop arraylist from small->big
             digraph = new EdgeWeightedDigraph(stops.size()); // create graph with number of vertices from bus stops arraylist
