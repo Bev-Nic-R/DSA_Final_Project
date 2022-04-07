@@ -9,11 +9,9 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import static java.lang.Integer.parseInt;
 
 public class busManagementSys {
-    private static String stopFile, stopTimeFile , transfersFile;
 
     static ArrayList<Integer> stops; // arraylist of integers used as corresponding matrix value for creation of
     static TST<String> TST; // empty ternary search tree
@@ -25,25 +23,22 @@ public class busManagementSys {
     public int indexOfMap = 0;
 
 
-    busManagementSys(String stopFile, String stopTimeFile, String transfersFile) {
-        this.stopTimeFile = stopTimeFile;
-        this.stopFile = stopFile;
-        this.transfersFile = transfersFile;
-    }
+
 
     public static void main(String[] args){
-        busManagementSys bus = new busManagementSys("stops.txt", "stop_times.txt", "transfers.txt");
-        addStopsToArraylist(stopFile);
-        addEdgesFromStopTimes(stopTimeFile);
-        addEdgesFromTransfersFile(transfersFile);
+        addStopsToArraylist("stops.txt");
+        addEdgesFromTransfersFile("transfers.txt");
+        addEdgesFromStopTimes("stop_times.txt");
+
         findShortestPath(7, 2);
     }
 
     public static void findShortestPath(int sourceVertex, int destinationVertex){
-        System.out.println("Finding shortest path");
 
         int sourceVIndex = Collections.binarySearch(stops, sourceVertex);
         int destVIndex = Collections.binarySearch(stops, destinationVertex);
+
+        System.out.println("Finding shortest path from bus stop " + sourceVertex + " to bus stop " + destinationVertex);
 
         SP = new DijkstraSP(digraph, sourceVIndex);
 
@@ -53,9 +48,11 @@ public class busManagementSys {
 
             Iterable<DirectedEdge> stopList = SP.pathTo(destVIndex);
             System.out.println("List of stops in this path (and associated costs):");
-            for(DirectedEdge stop: stopList) {
-                System.out.println("Stop ID: " + stop.to() + "\t Cost (from previous): " + stop.weight());
+            for(DirectedEdge stop: SP.pathTo(destVIndex)) {
+                System.out.println("Stop ID: " + stops.get(stop.to()) + "\t Cost (from last stop ): " + stop.weight());
             }
+        }else{
+            System.out.println("No path exists between these stops. ");
         }
     }
 
@@ -116,49 +113,39 @@ public class busManagementSys {
         return;
     }
 
-    public static void addEdgesFromStopTimes(String filename){
-        if(filename == null) {
-            return;
-        }
-        File file = new File(filename);
+    public static void addEdgesFromStopTimes(String filename) {
         try {
+            if (filename == null) {
+                return;
+            }
+            File file = new File(filename);
             Scanner scanner = new Scanner(file);
-            scanner.nextLine(); // skip the first line as it has no data
-            int tripID;
-            while(scanner.hasNextLine()) {
-                String line1 = scanner.nextLine();
-                String[] lineData1 = line1.split(",");
-                tripID = parseInt(lineData1[0]);
-                int vertex1 = Collections.binarySearch(stops, parseInt(lineData1[3]));  // get the stop ID from bus stop arraylist
-                int vertex2;
-                String line2;
-                String[] lineData2;
-                //int seq = 0;
-                while (parseInt(lineData1[0]) == tripID){
-                    // while the trip ID is the same, add edges
-                    if(scanner.hasNextLine()) {
-                        line2 = scanner.nextLine();
-                        lineData2 = line2.split(",");
-                        vertex2 = Collections.binarySearch(stops, parseInt(lineData2[3])); // get the stop ID from bus stop arraylist
-                        // System.out.println("Adding an edge from " + stops.get(vertex1) + " to " + stops.get(vertex2));
-                        DirectedEdge newEdge = new DirectedEdge(vertex1, vertex2, 1); // create new edge with
-                        digraph.addEdge(newEdge);
-                        line1 = line2;
-                        lineData1 = line1.split(",");
-                        vertex1 = Collections.binarySearch(stops, parseInt(lineData1[3]));
-                    }
-                    else{
-                        tripID = -1;
-                    }
+            scanner.nextLine(); // skip line0 as it has no data
+            String line = scanner.nextLine();
+            String[] line1 = line.split(",");
+            int vertexIndexOne;
+            int vertexIndexTwo;
+            DirectedEdge edge;
+            while (scanner.hasNextLine()) {
+                String nextLine = scanner.nextLine();
+                String[] line2 = nextLine.split(",");
+                if (parseInt(line1[0]) == parseInt(line2[0])) {
+                    // search the stops arraylist to get the position of where that bus id is in the arraylist
+                    vertexIndexOne = Collections.binarySearch(stops, parseInt(line1[3]));
+                    vertexIndexTwo = Collections.binarySearch(stops, parseInt(line2[3]));
+                    edge = new DirectedEdge(vertexIndexOne, vertexIndexTwo, 1); // add edge between those stops using a weight of 1 as it comes from stop_times.txt
+                    digraph.addEdge(edge);
                 }
+                line1 = line2; // go back as there could be an edge from second line to the next
             }
             scanner.close();
-        }
-        catch (FileNotFoundException e) {
-            System.out.println("Error: File was not found.");
+        } catch (FileNotFoundException e) {
+            System.out.println("Error: File not found.");
             e.printStackTrace();
         }
-        return;
     }
+
+
+
 
 }
