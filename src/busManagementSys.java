@@ -13,16 +13,17 @@ import static java.lang.Integer.parseInt;
 
 public class busManagementSys {
 
+    static ArrayList<String> stopTimes; // arraylist of integers used as corresponding matrix value for creation of
     static ArrayList<Integer> stops; // arraylist of integers used as corresponding matrix value for creation of
     static TST<String> TST; // empty ternary search tree
     static DijkstraSP SP;
-    static HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+    public static EdgeWeightedDigraph digraph;
+
 
     public static final String[] STREET_PREFIXES = new String[] {"FLAGSTOP", "WB", "NB", "SB", "EB"};
 
 
     public static final int ONE_HUNDRED = 100;
-    public static EdgeWeightedDigraph digraph;
 
 
     public static void main(String[] args){
@@ -34,6 +35,7 @@ public class busManagementSys {
         String test = "FLAGSTOP NB MILLER RD AT DEEP BAY";
         System.out.println(reformatStreetName(test));
         searchBusStop("Has");
+        searchByTime("5:25:00");
     }
 
     public static void searchBusStop(String prefix){
@@ -44,6 +46,21 @@ public class busManagementSys {
         }
         if (counter == 0) {
             System.out.println("There are no existing stops with this prefix.");
+        }
+    }
+
+    public static void searchByTime(String queryTime){
+        int counter = 0;
+        String[] arrivalTime;
+        for (String s : stopTimes) {
+            arrivalTime = s.split(",");
+            if (arrivalTime[1].trim().equals(queryTime)){
+                counter++;
+                System.out.println(s);
+            }
+        }
+        if (counter == 0) {
+            System.out.println("There are no existing stops with this arrival time.");
         }
     }
 
@@ -151,12 +168,18 @@ public class busManagementSys {
             scanner.nextLine(); // skip line0 as it has no data
             String line = scanner.nextLine();
             String[] line1 = line.split(",");
-            int vertexIndexOne;
-            int vertexIndexTwo;
+            int vertexIndexOne, vertexIndexTwo;
             DirectedEdge edge;
+            String arrivalTime;
+            String[] arrivalTimeSplit;
+            stopTimes = new ArrayList<>();
             while (scanner.hasNextLine()) {
                 String nextLine = scanner.nextLine();
                 String[] line2 = nextLine.split(",");
+                arrivalTime = line2[1].trim();
+                arrivalTimeSplit = arrivalTime.split(":");
+                if (parseInt(arrivalTimeSplit[0]) >= 0 && parseInt(arrivalTimeSplit[0]) < 24)
+                    stopTimes.add(nextLine);
                 if (parseInt(line1[0]) == parseInt(line2[0])) {
                     // search the stops arraylist to get the position of where that bus id is in the arraylist
                     vertexIndexOne = Collections.binarySearch(stops, parseInt(line1[3]));
@@ -166,6 +189,7 @@ public class busManagementSys {
                 }
                 line1 = line2; // go back as there could be an edge from second line to the next
             }
+            Collections.sort(stopTimes);
             scanner.close();
         } catch (FileNotFoundException e) {
             System.out.println("Error: File not found.");
