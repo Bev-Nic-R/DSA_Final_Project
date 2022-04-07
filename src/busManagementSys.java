@@ -18,6 +18,9 @@ public class busManagementSys {
     static DijkstraSP SP;
     static HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
 
+    public static final String[] STREET_PREFIXES = new String[] {"FLAGSTOP", "WB", "NB", "SB", "EB"};
+
+
     public static final int ONE_HUNDRED = 100;
     public static EdgeWeightedDigraph digraph;
     public int indexOfMap = 0;
@@ -29,8 +32,10 @@ public class busManagementSys {
         addStopsToArraylist("stops.txt");
         addEdgesFromTransfersFile("transfers.txt");
         addEdgesFromStopTimes("stop_times.txt");
-
         findShortestPath(7, 2);
+
+        String test = "FLAGSTOP NB MILLER RD AT DEEP BAY";
+        System.out.println(reformatStreetName(test));
     }
 
     public static void findShortestPath(int sourceVertex, int destinationVertex){
@@ -143,6 +148,18 @@ public class busManagementSys {
             System.out.println("Error: File not found.");
             e.printStackTrace();
         }
+    }
+
+    public static String reformatStreetName(String streetName){
+        String[] splitBySpaces = streetName.split(" ");
+        String firstWordInStreetName = splitBySpaces[0];
+        for (String prefix : STREET_PREFIXES){
+            if (firstWordInStreetName.equals(prefix)){
+                streetName = streetName.replace(firstWordInStreetName, "").trim();
+                streetName = streetName + " " + firstWordInStreetName;
+            }
+        }
+        return streetName;
     }
 
 
