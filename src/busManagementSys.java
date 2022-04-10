@@ -22,6 +22,10 @@ public class busManagementSys {
     public static final String[] STREET_PREFIXES = new String[] {"FLAGSTOP", "WB", "NB", "SB", "EB"}; // keywords array for use in reformatting
     public static final int ONE_HUNDRED = 100;
 
+    /*
+     * Calls the methods that read in the files and populate the chosen data structures.
+     * Handles user input and calls the features according to user choice.
+     */
     public static void main(String[] args){
         addStopsToArraylist("stops.txt"); // read in files and add data to arraylists and TST
         addEdgesFromTransfersFile("transfers.txt");
@@ -67,6 +71,9 @@ public class busManagementSys {
         }
     }
 
+    /*
+     * Asks user to enter the name or the first few letters of the bus stop they are looking for.
+     */
     public static void searchBusStop(){
         String prefix;
         System.out.println("Please enter the name or the first few letters of the bus stop you are searching for: ");
@@ -84,6 +91,10 @@ public class busManagementSys {
         }
     }
 
+    /*
+     * Asks user to enter the arrival time they are searching for and prints out any trips with that time. Handles any
+     * error checking on user input such as invalid times.
+     */
     public static void searchByTime(){
         System.out.println("Please enter the arrival time you are searching for in 'hh:mm:ss' format: ");
         Scanner scanner = new Scanner(System.in);
@@ -117,6 +128,10 @@ public class busManagementSys {
         }
     }
 
+    /*
+     * Asks user to enter two bus stops and prints out the shortest path between them and associated and overall cost.
+     * Handles error checking is user input is invalid bus stop, the bus stops are the same or there is no existing path.
+     */
     public static void findShortestPath(){
         System.out.println("Please enter the first bus stop:  ");
         Scanner scanner = new Scanner(System.in);
@@ -126,7 +141,7 @@ public class busManagementSys {
             if (scanner.hasNextInt()){
                 int destinationVertex = scanner.nextInt();
                 if (sourceVertex != destinationVertex){
-                    int sourceVIndex = Collections.binarySearch(stops, sourceVertex);
+                    int sourceVIndex = Collections.binarySearch(stops, sourceVertex); // search arraylist to get index of vertex
                     int destVIndex = Collections.binarySearch(stops, destinationVertex);
 
                     System.out.println("Finding shortest path from bus stop " + sourceVertex + " to bus stop " + destinationVertex);
@@ -159,7 +174,14 @@ public class busManagementSys {
         }
     }
 
-
+    /*
+     * Reads in the stops.txt file, adds the stop_ids to an arraylist of integers stops, creates a TST, calls the
+     * reformatStreetName method on the street names and stores the reformatted street name in the TST
+     * as a key along with an index. Also sorts the stops arraylist for use in binary search later and creates an
+     * EdgeWeightedDigraph using the number of stops.
+     * @param key filename the name of the file
+     * @throws IllegalArgumentException if the input file is not found
+     */
     public static void addStopsToArraylist(String filename) {
         try {
             if (filename == null) {
@@ -193,7 +215,13 @@ public class busManagementSys {
         }
     }
 
-
+    /*
+     * Reads in the transfers.txt file, finds the cost of each trip depending on transfer type,
+     * and creates directedWeightedEdges by finding the stop_ids index in the stops arraylist of
+     * integers and adds the edges to the graph.
+     * @param key filename the name of the file
+     * @throws IllegalArgumentException if the input file is not found
+     */
     public static void addEdgesFromTransfersFile(String filename){
         if(filename == null) {
             return;
@@ -227,6 +255,12 @@ public class busManagementSys {
         return;
     }
 
+    /*
+     * Reads in the stop_times.txt file, adds the lines to an arraylist of strings stopTimes, creates directedWeightedEdges
+     * by finding the stop_ids index in the stops arraylist of integers and adds the edges to the graph.
+     * @param key filename the name of the file
+     * @throws IllegalArgumentException if the input file is not found
+     */
     public static void addEdgesFromStopTimes(String filename) {
         try {
             if (filename == null) {
@@ -241,7 +275,7 @@ public class busManagementSys {
             DirectedEdge edge;
             String arrivalTime;
             String[] arrivalTimeSplit;
-            stopTimes = new ArrayList<>(); // create an array to store all the stop times for use searching bu arrival time
+            stopTimes = new ArrayList<>(); // create an array to store all the stop times for use searching by arrival time
             while (scanner.hasNextLine()) {
                 String nextLine = scanner.nextLine();
                 String[] line2 = nextLine.split(",");
@@ -250,7 +284,7 @@ public class busManagementSys {
                 if (parseInt(arrivalTimeSplit[0]) >= 0 && parseInt(arrivalTimeSplit[0]) < 24)
                     stopTimes.add(nextLine);
                 if (parseInt(line1[0]) == parseInt(line2[0])) {
-                    // search the stops arraylist to get the position of where that bus id is in the arraylist
+                    // search the stops arraylist to get the position of where that bus is in the arraylist
                     vertexIndexOne = Collections.binarySearch(stops, parseInt(line1[3]));
                     vertexIndexTwo = Collections.binarySearch(stops, parseInt(line2[3]));
                     edge = new DirectedEdge(vertexIndexOne, vertexIndexTwo, 1); // add edge between those stops using a weight of 1 as it comes from stop_times.txt
@@ -266,6 +300,11 @@ public class busManagementSys {
         }
     }
 
+    /*
+     * Reformats the street name by moving any keywords found to the end of the street name
+     * @param string streetName the name of the bus stop
+     * @returns the new formatted street name
+     */
     public static String reformatStreetName(String streetName){
         String[] splitBySpaces = streetName.split(" ");
         String firstWordInStreetName = splitBySpaces[0];
