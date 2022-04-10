@@ -12,8 +12,8 @@ import static java.lang.Integer.parseInt;
 
 public class busManagementSys {
 
-    static ArrayList<String> stopTimes; // arraylist of integers used as corresponding matrix value for creation of
-    static ArrayList<Integer> stops; // arraylist of integers used as corresponding matrix value for creation of
+    static ArrayList<String> stopTimes; // arraylist to store all the stop times
+    static ArrayList<Integer> stops; // arraylist to store bus stop_ids
     static TST<String> TST; // empty ternary search tree
     static DijkstraSP SP;
     public static EdgeWeightedDigraph digraph;
@@ -50,6 +50,8 @@ public class busManagementSys {
                     case 3:
                         searchByTime();
                         break;
+                    default:
+                        System.out.println("Invalid input. Please only enter 1, 2, 3 or 'exit'.");
                 }
                 System.out.println("\n\n");
             }
@@ -83,11 +85,9 @@ public class busManagementSys {
     }
 
     public static void searchByTime(){
-        String userQuery;
         System.out.println("Please enter the arrival time you are searching for in 'hh:mm:ss' format: ");
         Scanner scanner = new Scanner(System.in);
         if (scanner.hasNext()) {
-            userQuery = scanner.next();
             String queryTime = scanner.nextLine().trim(); // trim whitespace inputted by user
             String[] splitQueryTime = queryTime.split(":");
             // if user inputted time is valid and properly formatted
@@ -101,7 +101,7 @@ public class busManagementSys {
                 String[] arrivalTime;
                 for (String s : stopTimes) {
                     arrivalTime = s.split(",");
-                    if (arrivalTime[1].trim().equals(queryTime)) {
+                    if (arrivalTime[1].trim().equals(queryTime)) { // search in stopTimes array
                         counter++;
                         System.out.println(s);
                     }
@@ -241,7 +241,7 @@ public class busManagementSys {
             DirectedEdge edge;
             String arrivalTime;
             String[] arrivalTimeSplit;
-            stopTimes = new ArrayList<>();
+            stopTimes = new ArrayList<>(); // create an array to store all the stop times for use searching bu arrival time
             while (scanner.hasNextLine()) {
                 String nextLine = scanner.nextLine();
                 String[] line2 = nextLine.split(",");
@@ -258,7 +258,7 @@ public class busManagementSys {
                 }
                 line1 = line2; // go back as there could be an edge from second line to the next
             }
-            Collections.sort(stopTimes);
+            Collections.sort(stopTimes); // sort stopTimes by stop_id
             scanner.close();
         } catch (FileNotFoundException e) {
             System.out.println("Error: File not found.");
